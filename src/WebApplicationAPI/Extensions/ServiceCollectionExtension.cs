@@ -2,6 +2,7 @@
 using System.Reflection;
 using WebApplicationAPI.Interfaces.Repositories;
 using WebApplicationAPI.Interfaces.Services;
+using WebApplicationAPI.Middleware;
 using WebApplicationAPI.Repositories;
 using WebApplicationAPI.Services;
 
@@ -16,6 +17,7 @@ namespace WebApplicationAPI.Extensions
             services.AddScoped<ITagService, TagService>();
             services.AddScoped<IStackOverflowApiService, StackOverflowApiService>();
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
+            services.AddScoped<ErrorHandlingMiddleware>();
 
             services.AddDbContext<WebApplicationDbContext>(options =>
                 options.UseSqlServer(configuration.GetSection("ConnectionString").Value));

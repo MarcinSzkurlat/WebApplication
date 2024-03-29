@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Events;
 using WebApplicationAPI;
 using WebApplicationAPI.Extensions;
 using WebApplicationAPI.Interfaces.Services;
+using WebApplicationAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +21,19 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddApiExtensions(builder.Configuration);
 
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Logger(lc =>
+    {
+        lc.Filter.ByIncludingOnly(le => le.Level == LogEventLevel.Information);
+        lc.WriteTo.File("Logs/Info/info_.txt", rollingInterval: RollingInterval.Day);
+    })
+    .WriteTo.Logger(lc =>
+    {
+        lc.MinimumLevel.Warning();
+        lc.WriteTo.File("Logs/Errors/error_.txt", rollingInterval: RollingInterval.Day);
+    })
+    .CreateLogger();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -26,7 +42,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    bool dataBaseHasAnyRecord;
+    bool dataBaseHasAnyRecord = false;
 
     try
     {
@@ -38,7 +54,7 @@ if (app.Environment.IsDevelopment())
     }
     catch (Exception exception)
     {
-        throw new Exception($"Error while creating database | {exception}");
+        Log.Fatal($"Error while creating database | {exception}");
     }
 
     if (!dataBaseHasAnyRecord)
@@ -53,10 +69,12 @@ if (app.Environment.IsDevelopment())
         }
         catch (Exception exception)
         {
-            throw new Exception($"Error while fetching data | {exception}");
+            Log.Fatal($"Error while fetching data | {exception}");
         }
     }
 }
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Serilog;
 using WebApplicationAPI.Dtos;
 using WebApplicationAPI.Interfaces.Repositories;
 using WebApplicationAPI.Interfaces.Services;
@@ -27,6 +28,8 @@ namespace WebApplicationAPI.Services
         public async Task DeleteTagsAsync()
         {
             await _tagRepository.DeleteTagsAsync();
+
+            Log.Information("Tags deleted from database");
         }
     }
 }

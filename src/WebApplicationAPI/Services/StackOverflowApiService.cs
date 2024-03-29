@@ -1,5 +1,6 @@
 ﻿using System.IO.Compression;
 using System.Text.Json;
+using Serilog;
 using WebApplicationAPI.Interfaces.Repositories;
 using WebApplicationAPI.Interfaces.Services;
 using WebApplicationAPI.Models;
@@ -53,7 +54,7 @@ namespace WebApplicationAPI.Services
                 }
                 else
                 {
-                    throw new Exception("Error while fetching data");
+                    Log.Error($"Error while fetching data | {response.RequestMessage.RequestUri}");
                 }
             }
 
@@ -61,6 +62,8 @@ namespace WebApplicationAPI.Services
 
             await _tagRepository.AddTagsAsync(tags);
             await _tagRepository.SaveChangesAsync();
+
+            Log.Information("Tags added to database");
         }
     }
 }
