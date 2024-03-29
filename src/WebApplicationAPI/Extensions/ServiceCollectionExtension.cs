@@ -19,8 +19,12 @@ namespace WebApplicationAPI.Extensions
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddScoped<ErrorHandlingMiddleware>();
 
+            var connectionString = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Docker"
+                ? Environment.GetEnvironmentVariable("ConnectionString")
+                : configuration.GetSection("ConnectionString").Value;
+
             services.AddDbContext<WebApplicationDbContext>(options =>
-                options.UseSqlServer(configuration.GetSection("ConnectionString").Value));
+                options.UseSqlServer(connectionString));
         }
     }
 }

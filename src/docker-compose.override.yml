@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  db:
+   environment:
+    - ACCEPT_EULA=Y
+    - MSSQL_SA_PASSWORD=Password123?
+  webapplicationapi:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ConnectionString=Server=db,1433;Database=WebApplicationDB;User Id=SA;Password=Password123?;Trusted_Connection=false;Encrypt=False;
+      - PagesToFetch=15
+      - PageSize=10
+    ports:
+     - 5000:8080
