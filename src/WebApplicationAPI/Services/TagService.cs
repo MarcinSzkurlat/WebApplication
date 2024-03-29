@@ -3,6 +3,7 @@ using Serilog;
 using WebApplicationAPI.Dtos;
 using WebApplicationAPI.Interfaces.Repositories;
 using WebApplicationAPI.Interfaces.Services;
+using WebApplicationAPI.Models;
 
 namespace WebApplicationAPI.Services
 {
@@ -17,12 +18,19 @@ namespace WebApplicationAPI.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<TagDto>> GetTagsAsync()
+        public async Task<PaginatedItems<IEnumerable<TagDto>>> GetTagsAsync(int pageNumber, int pageSize, SortBy sortBy, SortDirection sortDirection)
         {
-            var tags = await _tagRepository.GetTagsAsync();
+            if (pageNumber == 0) throw new BadHttpRequestException("Page number must be more than 0");
+
+            var tags = await _tagRepository.GetTagsAsync(pageNumber, pageSize, sortBy, sortDirection);
             var tagsDto = _mapper.Map<IEnumerable<TagDto>>(tags);
 
-            return tagsDto;
+            var totalTagsCount = await _tagRepository.GetTagsCountAsync();
+
+            return new PaginatedItems<IEnumerable<TagDto>>(
+                tagsDto,
+                pageNumber,
+                (int)Math.Ceiling(totalTagsCount / (double)pageSize));
         }
 
         public async Task DeleteTagsAsync()

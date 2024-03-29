@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApplicationAPI.Dtos;
 using WebApplicationAPI.Interfaces.Services;
+using WebApplicationAPI.Models;
 
 namespace WebApplicationAPI.Controllers
 {
@@ -20,9 +21,14 @@ namespace WebApplicationAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TagDto>>> GetTagsAsync()
+        public async Task<ActionResult<PaginatedItems<IEnumerable<TagDto>>>> GetTagsAsync(
+            [FromQuery] SortBy sortBy,
+            [FromQuery] SortDirection sortDirection,
+            [FromQuery] uint pageNumber = 1)
         {
-            var tags = await _tagService.GetTagsAsync();
+            int.TryParse(_configuration["PageSize"], out int pageSize);
+
+            var tags = await _tagService.GetTagsAsync((int)pageNumber, pageSize, sortBy, sortDirection);
 
             return Ok(tags);
         }
